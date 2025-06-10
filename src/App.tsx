@@ -1,11 +1,44 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { ChevronDown, Play, Pause } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { ChevronDown } from 'lucide-react';
+
+// =============================================================================
+// INTERFACE DE TIPAGEM PARA AS PÁGINAS
+// =============================================================================
+// Documentação:
+// A propriedade `corFundo` foi alterada para opcional (`corFundo?: string;`)
+// para permitir que algumas páginas não a definam.
+interface PaginaConfig {
+  id: number;
+  tipo: "auto" | "manual";
+  layout: string;
+  corFundo?: string; // <-- CORREÇÃO APLICADA AQUI
+  tempoTransicao?: number;
+  titulo?: string;
+  subtitulo?: string;
+  estrelas?: boolean;
+  data?: string;
+  texto?: string;
+  contador?: {
+    dataInicio: string;
+    texto: string;
+  };
+  planetas?: boolean;
+  youtube?: {
+    videoId: string;
+  };
+  textoRodape?: string;
+  imagem?: string;
+  capitulo?: string;
+  corTituloCapitulo?: string;
+}
+
 
 // =============================================================================
 // CONFIGURAÇÃO DAS PÁGINAS DA RETROSPECTIVA
 // =============================================================================
-// Cada objeto representa uma "página" da história
-const paginasConfig = [
+// Documentação:
+// Nenhuma alteração necessária aqui. A correção na interface já resolve o problema.
+const paginasConfig: PaginaConfig[] = [
   {
     id: 1,
     tipo: "auto",
@@ -128,7 +161,7 @@ const paginasConfig = [
 ];
 
 // Estilo de texto padrão (gradiente roxo/rosa)
-const estiloTextoPrincipal = {
+const estiloTextoPrincipal: React.CSSProperties = {
   fontSize: 'clamp(2rem, 5vw, 3.5rem)',
   fontWeight: 700,
   marginBottom: '1rem',
@@ -145,16 +178,15 @@ const estiloTextoPrincipal = {
 function App() {
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [transicaoAtiva, setTransicaoAtiva] = useState(false);
-  const [musicaTocando, setMusicaTocando] = useState(false);
   const [contadorTempo, setContadorTempo] = useState({ dias: 0, horas: 0, minutos: 0, segundos: 0 });
 
   // =============================================================================
   // FUNÇÃO PARA CALCULAR TEMPO DECORRIDO EM TEMPO REAL
   // =============================================================================
-  const calcularTempoDecorrido = useCallback((dataInicio) => {
+  const calcularTempoDecorrido = useCallback((dataInicio: string) => {
     const inicio = new Date(dataInicio);
     const agora = new Date();
-    const diferenca = agora - inicio;
+    const diferenca = agora.getTime() - inicio.getTime();
 
     const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
     const horas = Math.floor((diferenca % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -167,14 +199,20 @@ function App() {
   // =============================================================================
   // EFEITO PARA ATUALIZAR CONTADOR EM TEMPO REAL
   // =============================================================================
+  // Documentação:
+  // Corrigimos o erro 'possibly 'undefined'' guardando `dataInicio` em uma
+  // constante antes de usá-la.
   useEffect(() => {
     const paginaConfig = paginasConfig.find(p => p.id === paginaAtual);
-    if (paginaConfig?.contador?.dataInicio) {
+    const dataInicio = paginaConfig?.contador?.dataInicio; // <-- Armazena o valor aqui
+
+    if (dataInicio) { // <-- Verifica se o valor existe
       const interval = setInterval(() => {
-        setContadorTempo(calcularTempoDecorrido(paginaConfig.contador.dataInicio));
+        setContadorTempo(calcularTempoDecorrido(dataInicio)); // <-- Usa a constante segura
       }, 1000);
-      // Calcula o tempo inicial ao carregar
-      setContadorTempo(calcularTempoDecorrido(paginaConfig.contador.dataInicio));
+      
+      setContadorTempo(calcularTempoDecorrido(dataInicio)); // <-- Usa a constante segura
+      
       return () => clearInterval(interval);
     }
   }, [paginaAtual, calcularTempoDecorrido]);
@@ -184,7 +222,7 @@ function App() {
   // =============================================================================
   useEffect(() => {
     const paginaConfig = paginasConfig.find(p => p.id === paginaAtual);
-    if (paginaConfig?.tipo === "auto") {
+    if (paginaConfig?.tipo === "auto" && paginaConfig.tempoTransicao) {
       const timer = setTimeout(() => {
         if (paginaAtual < paginasConfig.length) {
           mudarPagina(paginaAtual + 1);
@@ -197,20 +235,20 @@ function App() {
   // =============================================================================
   // FUNÇÃO PARA MUDAR DE PÁGINA COM TRANSIÇÃO SUAVE
   // =============================================================================
-  const mudarPagina = (novaPagina) => {
+  const mudarPagina = (novaPagina: number) => {
     if (novaPagina >= 1 && novaPagina <= paginasConfig.length && novaPagina !== paginaAtual) {
       setTransicaoAtiva(true);
       setTimeout(() => {
         setPaginaAtual(novaPagina);
         setTransicaoAtiva(false);
-      }, 500); // 0.5s para a transição
+      }, 500);
     }
   };
-  
+
   const avancarPagina = () => {
-      if (paginaAtual < paginasConfig.length) {
-          mudarPagina(paginaAtual + 1);
-      }
+    if (paginaAtual < paginasConfig.length) {
+      mudarPagina(paginaAtual + 1);
+    }
   };
 
   // =============================================================================
@@ -232,48 +270,48 @@ function App() {
   // =============================================================================
   // RENDERIZAÇÃO DE LAYOUT PARA PÁGINAS COM FOTOS/CAPÍTULOS
   // =============================================================================
-  const renderizarLayoutFoto = (pagina) => (
+  const renderizarLayoutFoto = (pagina: PaginaConfig) => (
     <div className="layout-foto">
-        <div className="card-foto">
-            <img 
-              src={pagina.imagem}
-              alt={pagina.titulo}
-              className="imagem-capitulo"
-            />
-        </div>
-        <div className="texto-capitulo-container">
-            {pagina.capitulo && <p className="numero-capitulo">{pagina.capitulo}</p>}
-            <h2 className="titulo-capitulo" style={{ background: pagina.corTituloCapitulo || 'linear-gradient(135deg, #9c27b0, #e91e63)' }}>
-              {pagina.titulo}
-            </h2>
-            <p className="descricao-capitulo">{pagina.texto}</p>
-        </div>
+      <div className="card-foto">
+        <img
+          src={pagina.imagem}
+          alt={pagina.titulo}
+          className="imagem-capitulo"
+        />
+      </div>
+      <div className="texto-capitulo-container">
+        {pagina.capitulo && <p className="numero-capitulo">{pagina.capitulo}</p>}
+        <h2 className="titulo-capitulo" style={{ background: pagina.corTituloCapitulo || 'linear-gradient(135deg, #9c27b0, #e91e63)' }}>
+          {pagina.titulo}
+        </h2>
+        <p className="descricao-capitulo">{pagina.texto}</p>
+      </div>
     </div>
   );
-  
+
   // =============================================================================
   // RENDERIZAÇÃO DE LAYOUT PARA PÁGINA DE MÚSICA
   // =============================================================================
-  const renderizarLayoutMusica = (pagina) => (
-      <div className="layout-musica">
-          <h1 style={{ ...estiloTextoPrincipal, textAlign: 'center' }}>{pagina.titulo}</h1>
-          <div className="player-container">
-              <div className="video-wrapper">
-                 <iframe
-                    width="100%"
-                    height="100%"
-                    src={`https://www.youtube.com/embed/${pagina.youtube.videoId}?autoplay=0&controls=1`}
-                    title="YouTube video player"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen>
-                </iframe>
-              </div>
-          </div>
-          <p className="texto-rodape-musica">{pagina.textoRodape}</p>
+  const renderizarLayoutMusica = (pagina: PaginaConfig) => (
+    <div className="layout-musica">
+      <h1 style={{ ...estiloTextoPrincipal, textAlign: 'center' }}>{pagina.titulo}</h1>
+      <div className="player-container">
+        <div className="video-wrapper">
+          <iframe
+            width="100%"
+            height="100%"
+            src={`https://www.youtube.com/embed/${pagina.youtube?.videoId}?autoplay=0&controls=1`}
+            title="YouTube video player"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen>
+          </iframe>
+        </div>
       </div>
+      <p className="texto-rodape-musica">{pagina.textoRodape}</p>
+    </div>
   );
-  
+
   // =============================================================================
   // FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO DE CONTEÚDO
   // =============================================================================
@@ -284,7 +322,7 @@ function App() {
     switch (pagina.layout) {
       case 'foto':
         return renderizarLayoutFoto(pagina);
-      
+
       case 'musica':
         return renderizarLayoutMusica(pagina);
 
@@ -292,20 +330,20 @@ function App() {
         return (
           <div style={{ textAlign: 'center' }}>
             {pagina.planetas && renderizarPlanetas()}
-            <h1 style={{...estiloTextoPrincipal, color: 'white', background: 'none', WebkitTextFillColor: 'initial'}}>
-              {pagina.contador.texto}
+            <h1 style={{ ...estiloTextoPrincipal, color: 'white', background: 'none', WebkitTextFillColor: 'initial' }}>
+              {pagina.contador?.texto}
             </h1>
             <div className="contador-container">
-                {Object.entries(contadorTempo).map(([unidade, valor]) => (
-                    <div key={unidade} className="contador-item especial">
-                        <span className="contador-valor">{valor}</span>
-                        <span className="contador-label">{unidade}</span>
-                    </div>
-                ))}
+              {Object.entries(contadorTempo).map(([unidade, valor]) => (
+                <div key={unidade} className="contador-item especial">
+                  <span className="contador-valor">{valor}</span>
+                  <span className="contador-label">{unidade}</span>
+                </div>
+              ))}
             </div>
           </div>
         );
-      
+
       case 'texto-com-data':
       case 'texto-simples':
         return (
@@ -317,26 +355,26 @@ function App() {
 
       case 'final':
         return (
-            <div className="layout-final">
-                <h1 style={{...estiloTextoPrincipal, fontSize: 'clamp(2.5rem, 6vw, 4.5rem)'}}>{pagina.titulo}</h1>
-                <p className="descricao-final">{pagina.texto}</p>
-                <p className="contador-final-label">{pagina.contador.texto}</p>
-                 <div className="contador-container">
-                    {Object.entries(contadorTempo).map(([unidade, valor]) => (
-                        <div key={unidade} className="contador-item final">
-                            <span className="contador-valor">{valor}</span>
-                            <span className="contador-label">{unidade}</span>
-                        </div>
-                    ))}
+          <div className="layout-final">
+            <h1 style={{ ...estiloTextoPrincipal, fontSize: 'clamp(2.5rem, 6vw, 4.5rem)' }}>{pagina.titulo}</h1>
+            <p className="descricao-final">{pagina.texto}</p>
+            <p className="contador-final-label">{pagina.contador?.texto}</p>
+            <div className="contador-container">
+              {Object.entries(contadorTempo).map(([unidade, valor]) => (
+                <div key={unidade} className="contador-item final">
+                  <span className="contador-valor">{valor}</span>
+                  <span className="contador-label">{unidade}</span>
                 </div>
-                <button className="botao-compartilhar">Para sempre juntos ❤️</button>
+              ))}
             </div>
+            <button className="botao-compartilhar">Para sempre juntos ❤️</button>
+          </div>
         );
 
       default:
         return (
           <div style={{ textAlign: 'center' }}>
-            <h1 style={{...estiloTextoPrincipal, color: 'white', background: 'none', WebkitTextFillColor: 'initial'}}>{pagina.titulo}</h1>
+            <h1 style={{ ...estiloTextoPrincipal, color: 'white', background: 'none', WebkitTextFillColor: 'initial' }}>{pagina.titulo}</h1>
             <h2 className="subtitulo-principal">{pagina.subtitulo}</h2>
           </div>
         );
@@ -351,15 +389,15 @@ function App() {
   return (
     <main className="app-container" style={{ background: paginaConfig?.corFundo || 'linear-gradient(to bottom, #9c27b033, #000000)' }}>
       <div className={`conteudo-pagina ${transicaoAtiva ? 'saindo' : 'entrando'}`}>
-        
+
         {paginaConfig?.estrelas && renderizarEstrelas()}
-        
+
         {renderizarConteudo()}
-        
+
         {paginaConfig?.tipo === 'manual' && paginaAtual < paginasConfig.length && (
-            <div className="seta-container" onClick={avancarPagina}>
-                <ChevronDown size={32} />
-            </div>
+          <div className="seta-container" onClick={avancarPagina}>
+            <ChevronDown size={32} />
+          </div>
         )}
       </div>
 
