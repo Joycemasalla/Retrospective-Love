@@ -48,7 +48,7 @@ const paginasConfig: PaginaConfig[] = [
     id: 2,
     tipo: "auto",
     tempoTransicao: 4000,
-    data: "9 de fevereiro de 1999",
+    data: "9 de setembro de 2024",
     texto: "Alguns encontros mudam nossas vidas para sempre...",
     corFundo: "#000",
     estrelas: true,
@@ -86,7 +86,7 @@ const paginasConfig: PaginaConfig[] = [
     tipo: "auto",
     tempoTransicao: 5000,
     contador: {
-      dataInicio: "1999-02-09T00:00:00",
+      dataInicio: "2024-09-09T00:00:00",
       texto: "Já demos várias voltas ao redor do sol..."
     },
     corFundo: "linear-gradient(135deg, #9c27b0 0%, #e91e63 100%)",
@@ -98,7 +98,7 @@ const paginasConfig: PaginaConfig[] = [
     tipo: "manual",
     titulo: "Que tal dar play na música que me faz reviver nossa história?",
     youtube: {
-      videoId: "pRpeEdMmmQ0", // Exemplo: All of Me - John Legend
+      videoId: "Wo-x0w-SMJY", // Exemplo: All of Me - John Legend
     },
     corFundo: "#000000",
     layout: "musica",
@@ -109,7 +109,7 @@ const paginasConfig: PaginaConfig[] = [
     tipo: "manual",
     titulo: "Nossa Primeira Foto",
     texto: "O momento em que capturamos nosso primeiro sorriso juntos. Um instante eternizado que marca o início da nossa história.",
-    imagem: "https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg?auto=compress&cs=tinysrgb&w=800",
+    imagem: "https://i.postimg.cc/T1XhZd7N/Imagem-do-Whats-App-de-2025-06-10-s-12-27-15-ca72bb14.jpg",
     layout: "foto",
     capitulo: "Capítulo 1"
   },
@@ -118,7 +118,7 @@ const paginasConfig: PaginaConfig[] = [
     tipo: "manual",
     titulo: "Nossa Primeira Viagem",
     texto: "Descobrindo novos lugares e criando memórias inesquecíveis juntos.",
-    imagem: "https://images.pexels.com/photos/1320684/pexels-photo-1320684.jpeg?auto=compress&cs=tinysrgb&w=800",
+    imagem: "https://i.postimg.cc/NF7Lt3Zs/Imagem-do-Whats-App-de-2025-06-10-s-12-27-45-28b94800.jpg",
     layout: "foto",
     capitulo: "Capítulo 2"
   },
@@ -127,7 +127,7 @@ const paginasConfig: PaginaConfig[] = [
     tipo: "manual",
     titulo: "Momentos Especiais",
     texto: "Cada sorriso, cada abraço, cada momento ao seu lado é um tesouro eterno.",
-    imagem: "https://images.pexels.com/photos/3290073/pexels-photo-3290073.jpeg?auto=compress&cs=tinysrgb&w=800",
+    imagem: "https://i.postimg.cc/qM4zw7Cz/Imagem-do-Whats-App-de-2025-06-10-s-12-30-39-193a0633.jpg",
     layout: "foto",
     capitulo: "Capítulo 3"
   },
@@ -136,7 +136,7 @@ const paginasConfig: PaginaConfig[] = [
     tipo: "manual",
     titulo: "Momentos Atuais",
     texto: "Continuando nossa jornada de amor, construindo um futuro cheio de felicidade juntos.",
-    imagem: "https://images.pexels.com/photos/1758531/pexels-photo-1758531.jpeg?auto=compress&cs=tinysrgb&w=800",
+    imagem: "https://i.postimg.cc/MTBvPMDj/Imagem-do-Whats-App-de-2025-06-09-s-17-23-15-84fe5ac7.jpg",
     layout: "foto",
     capitulo: "Capítulo 4",
   },
@@ -146,7 +146,7 @@ const paginasConfig: PaginaConfig[] = [
     titulo: "Nossa História Continua...",
     texto: "Cada dia é uma nova oportunidade de escrever mais um capítulo juntos.",
     contador: {
-      dataInicio: "1999-02-09T00:00:00",
+      dataInicio: "2024-09-09T00:00:00",
       texto: "Dias lado a lado:"
     },
     corFundo: "linear-gradient(to bottom, #9c27b033, #000000)",
