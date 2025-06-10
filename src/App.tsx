@@ -484,7 +484,7 @@ function App() {
 
         .seta-container {
           position: absolute; /* Garantir que a seta fique no rodapé */
-          bottom: 0.8rem;
+          bottom: 1rem;
           cursor: pointer;
           animation: bounce 2s infinite;
           color: rgba(255,255,255,0.7);
