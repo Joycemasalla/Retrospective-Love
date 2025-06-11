@@ -360,7 +360,7 @@ function App() {
       case 'texto-com-data':
       case 'texto-simples':
         return (
-          <div style={{ textAlign: 'center' }}>
+          <div style={{ textAlign: 'center', padding: '2.5rem' }}>
             {pagina.data && <p className="data-texto">{pagina.data}</p>}
             <p style={{ ...estiloTextoPrincipal, lineHeight: 1.3 }}>{pagina.texto}</p>
           </div>
