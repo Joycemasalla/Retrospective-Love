@@ -144,7 +144,7 @@ const paginasConfig: PaginaConfig[] = [
     id: 12,
     tipo: "manual",
     titulo: "Nossa História Continua...",
-    texto: "Cada dia é uma nova oportunidade de escrever mais um capítulo juntos.",
+    texto: "Dividiamos a camisa 9.... Agora dividimos a vida.",
     contador: {
       dataInicio: "2024-09-09T00:00:00",
       texto: "Dias lado a lado:"
