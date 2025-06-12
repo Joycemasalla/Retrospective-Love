@@ -1,14 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ChevronDown } from 'lucide-react';
 
-// =============================================================================
-// INTERFACE DE TIPAGEM PARA AS PÁGINAS
-// =============================================================================
 interface PaginaConfig {
   id: number;
   tipo: "auto" | "manual";
   layout: string;
   corFundo?: string;
+  aurora?: boolean;
   tempoTransicao?: number;
   titulo?: string;
   subtitulo?: string;
@@ -29,10 +27,6 @@ interface PaginaConfig {
   corTituloCapitulo?: string;
 }
 
-
-// =============================================================================
-// CONFIGURAÇÃO DAS PÁGINAS DA RETROSPECTIVA
-// =============================================================================
 const paginasConfig: PaginaConfig[] = [
   {
     id: 1,
@@ -40,7 +34,7 @@ const paginasConfig: PaginaConfig[] = [
     tempoTransicao: 4000,
     titulo: "Nossa História",
     subtitulo: "Uma jornada de amor e momentos inesquecíveis",
-    corFundo: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    aurora: true,
     estrelas: true,
     layout: "titulo-principal"
   },
@@ -51,6 +45,7 @@ const paginasConfig: PaginaConfig[] = [
     data: "9 de setembro de 2024",
     texto: "Alguns encontros mudam nossas vidas para sempre...",
     corFundo: "#000",
+    aurora: true,
     estrelas: true,
     layout: "texto-com-data"
   },
@@ -60,6 +55,7 @@ const paginasConfig: PaginaConfig[] = [
     tempoTransicao: 4000,
     texto: "Cada momento ao seu lado é uma memória eterna...",
     corFundo: "#000",
+    aurora: true,
     estrelas: true,
     layout: "texto-simples"
   },
@@ -69,6 +65,7 @@ const paginasConfig: PaginaConfig[] = [
     tempoTransicao: 4000,
     texto: "Nossa história é feita de pequenos instantes mágicos...",
     corFundo: "#000",
+    aurora: true,
     estrelas: true,
     layout: "texto-simples"
   },
@@ -78,6 +75,7 @@ const paginasConfig: PaginaConfig[] = [
     tempoTransicao: 4000,
     texto: "Deslize para reviver nossa jornada juntos...",
     corFundo: "#000",
+    aurora: true,
     estrelas: true,
     layout: "texto-simples"
   },
@@ -98,7 +96,7 @@ const paginasConfig: PaginaConfig[] = [
     tipo: "manual",
     titulo: "Que tal dar play na música que me faz reviver nossa história?",
     youtube: {
-      videoId: "Wo-x0w-SMJY", // Exemplo: All of Me - John Legend
+      videoId: "Wo-x0w-SMJY",
     },
     corFundo: "#000000",
     layout: "musica",
@@ -154,7 +152,6 @@ const paginasConfig: PaginaConfig[] = [
   }
 ];
 
-// Estilo de texto padrão (gradiente roxo/rosa)
 const estiloTextoPrincipal: React.CSSProperties = {
   fontSize: 'clamp(2rem, 5vw, 3.5rem)',
   fontWeight: 700,
@@ -162,40 +159,28 @@ const estiloTextoPrincipal: React.CSSProperties = {
   background: 'linear-gradient(135deg, #9c27b0, #e91e63)',
   WebkitBackgroundClip: 'text',
   WebkitTextFillColor: 'transparent',
-  animation: 'slideUp 0.8s ease forwards',
 };
 
-
-// =============================================================================
-// COMPONENTE PRINCIPAL DA APLICAÇÃO
-// =============================================================================
 function App() {
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [transicaoAtiva, setTransicaoAtiva] = useState(false);
   const [contadorTempo, setContadorTempo] = useState({ dias: 0, horas: 0, minutos: 0, segundos: 0 });
+  const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
 
-  // =============================================================================
-  // FUNÇÃO PARA CALCULAR TEMPO DECORRIDO EM TEMPO REAL
-  // =============================================================================
   const calcularTempoDecorrido = useCallback((dataInicio: string) => {
     const inicio = new Date(dataInicio);
     const agora = new Date();
     const diferenca = agora.getTime() - inicio.getTime();
-
     const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
     const horas = Math.floor((diferenca % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
     const segundos = Math.floor((diferenca % (1000 * 60)) / 1000);
-
     return { dias, horas, minutos, segundos };
   }, []);
 
-  // =============================================================================
-  // EFEITO PARA ATUALIZAR CONTADOR EM TEMPO REAL
-  // =============================================================================
   useEffect(() => {
     const paginaConfig = paginasConfig.find(p => p.id === paginaAtual);
-    const dataInicio = paginaConfig?.contador?.dataInicio; 
+    const dataInicio = paginaConfig?.contador?.dataInicio;
 
     if (dataInicio) {
       const interval = setInterval(() => {
@@ -206,9 +191,6 @@ function App() {
     }
   }, [paginaAtual, calcularTempoDecorrido]);
 
-  // =============================================================================
-  // EFEITO PARA TRANSIÇÃO AUTOMÁTICA ENTRE PÁGINAS
-  // =============================================================================
   useEffect(() => {
     const paginaConfig = paginasConfig.find(p => p.id === paginaAtual);
     if (paginaConfig?.tipo === "auto" && paginaConfig.tempoTransicao) {
@@ -221,9 +203,20 @@ function App() {
     }
   }, [paginaAtual]);
 
-  // =============================================================================
-  // FUNÇÃO PARA MUDAR DE PÁGINA COM TRANSIÇÃO SUAVE
-  // =============================================================================
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      const { clientX, clientY } = event;
+      const { innerWidth, innerHeight } = window;
+      const offsetX = (clientX / innerWidth - 0.5) * 2;
+      const offsetY = (clientY / innerHeight - 0.5) * 2;
+      setMouseOffset({ x: offsetX, y: offsetY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
+
   const mudarPagina = (novaPagina: number) => {
     if (novaPagina >= 1 && novaPagina <= paginasConfig.length && novaPagina !== paginaAtual) {
       setTransicaoAtiva(true);
@@ -240,110 +233,96 @@ function App() {
     }
   };
 
-  // <-- MELHORIA 1 APLICADA AQUI -->
-  // Função para avançar a página com um clique na tela, caso seja do tipo 'auto'
   const handleAutoPageClick = () => {
-      const paginaConfig = paginasConfig.find(p => p.id === paginaAtual);
-      if (paginaConfig?.tipo === 'auto') {
-          avancarPagina();
-      }
+    const paginaConfig = paginasConfig.find(p => p.id === paginaAtual);
+    if (paginaConfig?.tipo === 'auto') {
+      avancarPagina();
+    }
   };
 
-  // =============================================================================
-  // COMPONENTES DE RENDERIZAÇÃO - EFEITOS VISUAIS
-  // =============================================================================
   const renderizarEstrelas = () => (
-    <div className="estrelas-fundo">
+    <div className="estrelas-fundo" style={{ '--offsetX': mouseOffset.x, '--offsetY': mouseOffset.y } as React.CSSProperties}>
       {[...Array(100)].map((_, i) => <div key={i} className="estrela" style={{ top: `${Math.random() * 100}%`, left: `${Math.random() * 100}%`, animationDelay: `${Math.random() * 5}s`, animationDuration: `${2 + Math.random() * 3}s` }} />)}
     </div>
   );
 
   const renderizarPlanetas = () => (
-    <div className="planetas-container">
+    <div className="planetas-container" style={{ '--offsetX': mouseOffset.x, '--offsetY': mouseOffset.y } as React.CSSProperties}>
       <div className="planeta p1"></div>
       <div className="planeta p2"></div>
     </div>
   );
-  
-  // <-- MELHORIA 2 APLICADA AQUI -->
-  // Componente para renderizar a navegação lateral com bolinhas
+
+  // Renderizar camadas de aurora com blur
+  const renderizarAurora = () => (
+    <div className="aurora-container">
+      <div className="aurora-layer aurora-layer-1"></div>
+      <div className="aurora-layer aurora-layer-2"></div>
+      <div className="aurora-layer aurora-layer-3"></div>
+      <div className="aurora-particles">
+        {[...Array(30)].map((_, i) => (
+          <div
+            key={i}
+            className="aurora-particle"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 10}s`,
+              animationDuration: `${8 + Math.random() * 12}s`
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+
   const renderizarNavegacao = () => (
     <div className="navegacao-dots-container">
       {paginasConfig.map((pagina) => (
-        <div
-          key={pagina.id}
-          className={`nav-dot ${pagina.id === paginaAtual ? 'ativo' : ''}`}
-          onClick={() => mudarPagina(pagina.id)}
-        />
+        <div key={pagina.id} className={`nav-dot ${pagina.id === paginaAtual ? 'ativo' : ''}`} onClick={() => mudarPagina(pagina.id)} />
       ))}
     </div>
   );
 
-  // =============================================================================
-  // RENDERIZAÇÃO DE LAYOUT PARA PÁGINAS COM FOTOS/CAPÍTULOS
-  // =============================================================================
   const renderizarLayoutFoto = (pagina: PaginaConfig) => (
     <div className="layout-foto">
-      <div className="card-foto">
-        <img
-          src={pagina.imagem}
-          alt={pagina.titulo}
-          className="imagem-capitulo"
-        />
+      {/* Adicionamos uma 'key' única ao card da foto para forçar a re-animação */}
+      <div className="card-foto" key={`card-${pagina.id}`}>
+        <img src={pagina.imagem} alt={pagina.titulo} className="imagem-capitulo" />
       </div>
-      <div className="texto-capitulo-container">
+      {/* Adicionamos também uma 'key' ao container de texto */}
+      <div className="texto-capitulo-container" key={`texto-${pagina.id}`}>
         {pagina.capitulo && <p className="numero-capitulo">{pagina.capitulo}</p>}
-        {/* O estilo do título foi movido para o CSS para garantir a legibilidade */}
-        <h2 className="titulo-capitulo">
-          {pagina.titulo}
-        </h2>
+        <h2 className="titulo-capitulo">{pagina.titulo}</h2>
         <p className="descricao-capitulo">{pagina.texto}</p>
       </div>
     </div>
   );
 
-  // =============================================================================
-  // RENDERIZAÇÃO DE LAYOUT PARA PÁGINA DE MÚSICA
-  // =============================================================================
   const renderizarLayoutMusica = (pagina: PaginaConfig) => (
     <div className="layout-musica">
-      <h1 style={{ ...estiloTextoPrincipal, textAlign: 'center' }}>{pagina.titulo}</h1>
+      <h1 className="titulo-animado" style={{ ...estiloTextoPrincipal, textAlign: 'center' }}>{pagina.titulo}</h1>
       <div className="player-container">
         <div className="video-wrapper">
-          <iframe
-            width="100%"
-            height="100%"
-            src={`https://www.youtube.com/embed/${pagina.youtube?.videoId}?autoplay=0&controls=1`}
-            title="YouTube video player"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen>
-          </iframe>
+          <iframe width="100%" height="100%" src={`https://www.youtube.com/embed/${pagina.youtube?.videoId}?autoplay=0&controls=1`} title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
         </div>
       </div>
       <p className="texto-rodape-musica">{pagina.textoRodape}</p>
     </div>
   );
 
-  // =============================================================================
-  // FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO DE CONTEÚDO
-  // =============================================================================
   const renderizarConteudo = () => {
     const pagina = paginasConfig.find(p => p.id === paginaAtual);
     if (!pagina) return null;
 
     switch (pagina.layout) {
-      case 'foto':
-        return renderizarLayoutFoto(pagina);
-
-      case 'musica':
-        return renderizarLayoutMusica(pagina);
-
+      case 'foto': return renderizarLayoutFoto(pagina);
+      case 'musica': return renderizarLayoutMusica(pagina);
       case 'contador-especial':
         return (
           <div style={{ textAlign: 'center' }}>
             {pagina.planetas && renderizarPlanetas()}
-            <h1 style={{ ...estiloTextoPrincipal, color: 'white', background: 'none', WebkitTextFillColor: 'initial' }}>
+            <h1 className="titulo-animado" style={{ ...estiloTextoPrincipal, color: 'white', background: 'none', WebkitTextFillColor: 'initial' }}>
               {pagina.contador?.texto}
             </h1>
             <div className="contador-container">
@@ -362,14 +341,18 @@ function App() {
         return (
           <div style={{ textAlign: 'center', padding: '2.5rem' }}>
             {pagina.data && <p className="data-texto">{pagina.data}</p>}
-            <p style={{ ...estiloTextoPrincipal, lineHeight: 1.3 }}>{pagina.texto}</p>
+            <div style={{ animation: 'emergeFromMist 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards' }}>
+              <p style={{ ...estiloTextoPrincipal, lineHeight: 1.3 }}>
+                {pagina.texto}
+              </p>
+            </div>
           </div>
         );
 
       case 'final':
         return (
           <div className="layout-final">
-            <h1 style={{ ...estiloTextoPrincipal, fontSize: 'clamp(2.5rem, 6vw, 4.5rem)' }}>{pagina.titulo}</h1>
+            <h1 className="titulo-animado" style={{ ...estiloTextoPrincipal, fontSize: 'clamp(2.5rem, 6vw, 4.5rem)' }}>{pagina.titulo}</h1>
             <p className="descricao-final">{pagina.texto}</p>
             <p className="contador-final-label">{pagina.contador?.texto}</p>
             <div className="contador-container">
@@ -387,33 +370,28 @@ function App() {
       default:
         return (
           <div style={{ textAlign: 'center' }}>
-            <h1 style={{ ...estiloTextoPrincipal, color: 'white', background: 'none', WebkitTextFillColor: 'initial' }}>{pagina.titulo}</h1>
+            <h1 className="titulo-animado" style={{ ...estiloTextoPrincipal, color: 'white', background: 'none', WebkitTextFillColor: 'initial' }}>{pagina.titulo}</h1>
             <h2 className="subtitulo-principal">{pagina.subtitulo}</h2>
           </div>
         );
     }
   };
 
-  // =============================================================================
-  // RENDERIZAÇÃO PRINCIPAL DO COMPONENTE
-  // =============================================================================
   const paginaConfig = paginasConfig.find(p => p.id === paginaAtual);
 
   return (
-    <main className="app-container" style={{ padding: 0, background: paginaConfig?.corFundo || 'linear-gradient(to bottom, #9c27b033, #000000)' }}>
-      {/* <-- MELHORIA 2 APLICADA AQUI --> */}
+    <main
+      className={`app-container ${paginaConfig?.aurora ? 'fundo-aurora' : ''}`}
+      style={{
+        padding: 0,
+        background: paginaConfig?.aurora ? 'none' : (paginaConfig?.corFundo || '#000')
+      }}
+    >
+      {paginaConfig?.aurora && renderizarAurora()}
       {renderizarNavegacao()}
-
-      <div 
-        className={`conteudo-pagina ${transicaoAtiva ? 'saindo' : 'entrando'}`}
-        // <-- MELHORIA 1 APLICADA AQUI -->
-        onClick={handleAutoPageClick}
-      >
-
+      <div className={`conteudo-pagina ${transicaoAtiva ? 'saindo' : 'entrando'}`} onClick={handleAutoPageClick}>
         {paginaConfig?.estrelas && renderizarEstrelas()}
-
         {renderizarConteudo()}
-
         {paginaConfig?.tipo === 'manual' && paginaAtual < paginasConfig.length && (
           <div className="seta-container" onClick={avancarPagina}>
             <ChevronDown size={32} />
@@ -421,176 +399,233 @@ function App() {
         )}
       </div>
 
-      {/* Folha de Estilos CSS embutida */}
       <style>{`
-        /* --- Estilização Geral e Animações --- */
-        .app-container {
-          height: 100vh;
-          width: 100%;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          text-align: center;
-          padding: 1.5rem;
-          position: relative;
-          overflow: hidden;
-          z-index: 1;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-          color: white;
-          transition: background 0.8s ease;
+        .app-container { 
+          height: 100vh; 
+          width: 100%; 
+          display: flex; 
+          flex-direction: column; 
+          justify-content: center; 
+          align-items: center; 
+          text-align: center; 
+          padding: 1.5rem; 
+          position: relative; 
+          overflow: hidden; 
+          z-index: 1; 
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+          color: white; 
+          transition: background 0.8s ease; 
+        }
+        
+        /* FUNDO AURORA MELHORADO COM BLUR E CAMADAS */
+        .fundo-aurora {
+          background: radial-gradient(circle at 20% 30%, #1a0229 0%, #0d051a 100%);
         }
 
-        .conteudo-pagina {
-          z-index: 10;
-          position: relative;
+        .aurora-container {
+          position: absolute;
+          top: 0;
+          left: 0;
           width: 100%;
           height: 100%;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          cursor: pointer; /* Adicionado para indicar que é clicável */
+          z-index: -1;
+          overflow: hidden;
+        }
+
+        .aurora-layer {
+          position: absolute;
+          width: 120%;
+          height: 120%;
+          top: -10%;
+          left: -10%;
+          opacity: 0.8;
+          mix-blend-mode: screen;
+          filter: blur(40px);
+          animation: auroraFlow 25s ease-in-out infinite;
+        }
+
+        .aurora-layer-1 {
+          background: radial-gradient(ellipse 800px 400px at 30% 20%, 
+            hsla(284, 80%, 60%, 0.6) 0%, 
+            hsla(340, 75%, 55%, 0.4) 30%, 
+            transparent 70%);
+          animation-delay: 0s;
+        }
+
+        .aurora-layer-2 {
+          background: radial-gradient(ellipse 600px 300px at 70% 80%, 
+            hsla(240, 70%, 65%, 0.5) 0%, 
+            hsla(300, 80%, 50%, 0.3) 40%, 
+            transparent 70%);
+          animation-delay: -8s;
+          animation-duration: 30s;
+        }
+
+        .aurora-layer-3 {
+          background: radial-gradient(ellipse 1000px 200px at 50% 60%, 
+            hsla(320, 90%, 55%, 0.4) 0%, 
+            hsla(260, 70%, 60%, 0.2) 50%, 
+            transparent 80%);
+          animation-delay: -15s;
+          animation-duration: 35s;
+          filter: blur(60px);
+        }
+
+        @keyframes auroraFlow {
+          0%, 100% { 
+            transform: translateX(-20%) translateY(-10%) rotate(0deg) scale(1);
+            opacity: 0.6;
+          }
+          25% { 
+            transform: translateX(10%) translateY(-20%) rotate(2deg) scale(1.1);
+            opacity: 0.8;
+          }
+          50% { 
+            transform: translateX(20%) translateY(10%) rotate(-1deg) scale(0.9);
+            opacity: 0.7;
+          }
+          75% { 
+            transform: translateX(-10%) translateY(20%) rotate(1deg) scale(1.05);
+            opacity: 0.9;
+          }
+        }
+
+        .aurora-particles {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          z-index: 1;
+        }
+
+        .aurora-particle {
+          position: absolute;
+          width: 4px;
+          height: 4px;
+          background: radial-gradient(circle, 
+            hsla(300, 100%, 80%, 0.8) 0%, 
+            hsla(280, 100%, 70%, 0.4) 50%, 
+            transparent 100%);
+          border-radius: 50%;
+          filter: blur(2px);
+          animation: floatParticle linear infinite;
+        }
+
+        @keyframes floatParticle {
+          0% {
+            transform: translateY(100vh) scale(0);
+            opacity: 0;
+          }
+          10% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          90% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(-100px) scale(0);
+            opacity: 0;
+          }
+        }
+
+        .conteudo-pagina { 
+          z-index: 10; 
+          position: relative; 
+          width: 100%; 
+          height: 100%; 
+          display: flex; 
+          flex-direction: column; 
+          justify-content: center; 
+          align-items: center; 
+          cursor: pointer; 
         }
         
-        .conteudo-pagina.entrando {
-          animation: fadeIn 0.8s ease forwards;
-        }
-
-        .conteudo-pagina.saindo {
-          animation: fadeOut 0.5s ease forwards;
-        }
-
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-
-        @keyframes fadeOut {
-          from { opacity: 1; }
-          to { opacity: 0; }
+        .conteudo-pagina.entrando { 
+          animation: fadeIn 0.8s ease forwards; 
         }
         
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
+        .conteudo-pagina.saindo { 
+          animation: fadeOut 0.5s ease forwards; 
         }
-
-        @keyframes bounce {
-          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-          40% { transform: translateY(-10px); }
-          60% { transform: translateY(-5px); }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-10px); } 60% { transform: translateY(-5px); } }
+        @keyframes emergeFromMist { from { opacity: 0; transform: scale(0.85); filter: blur(12px); } to { opacity: 1; transform: scale(1); filter: blur(0); } }
+        
+        .titulo-animado, .subtitulo-principal, .data-texto, .texto-rodape-musica { 
+          animation: slideUp 1s ease-out forwards; 
+          text-shadow: 0 0 20px rgba(156, 39, 176, 0.5), 0 0 40px rgba(233, 30, 99, 0.3);
         }
-
-        .seta-container {
-          position: absolute; /* Garantir que a seta fique no rodapé */
-          bottom: 6rem;
-          cursor: pointer;
-          animation: bounce 2s infinite;
-          color: rgba(255,255,255,0.7);
-          transition: color 0.3s ease;
-          z-index: 50;
-        }
-        .seta-container:hover {
-          color: #e91e63;
-        }
-
-        /* --- Estrelas e Planetas --- */
-        .estrelas-fundo { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        
+        .subtitulo-principal { animation-delay: 0.2s; opacity: 0; }
+        .seta-container { position: absolute; bottom: 2rem; cursor: pointer; animation: bounce 2s infinite; color: rgba(255,255,255,0.7); transition: color 0.3s ease; z-index: 50; }
+        .seta-container:hover { color: #e91e63; }
+        .estrelas-fundo, .planetas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; transition: transform 0.2s ease-out; }
+        .estrelas-fundo { transform: translate(calc(var(--offsetX, 0) * -15px), calc(var(--offsetY, 0) * -15px)); }
+        .planetas-container { transform: translate(calc(var(--offsetX, 0) * 20px), calc(var(--offsetY, 0) * 20px)); }
         .estrela { position: absolute; background-color: rgba(255,255,255,0.8); border-radius: 50%; width: 2px; height: 2px; animation: piscar linear infinite; }
         @keyframes piscar { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.8; } }
-        
-        .planetas-container { position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 5; overflow: hidden; }
         .planeta { border-radius: 50%; position: absolute; animation: float 6s ease-in-out infinite; }
         .planeta.p1 { width: 80px; height: 80px; background: linear-gradient(135deg, #ff9500 0%, #ff6b35 100%); top: 15%; right: 10%; box-shadow: 0 0 30px rgba(255, 149, 0, 0.5); }
         .planeta.p2 { width: 40px; height: 40px; background: linear-gradient(135deg, #00bcd4 0%, #2196f3 100%); top: 60%; left: 15%; box-shadow: 0 0 20px rgba(0, 188, 212, 0.5); animation-direction: reverse; }
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-20px); } 100% { transform: translateY(0px); } }
-        
-        /* --- Layouts de Texto --- */
-        .subtitulo-principal { font-size: clamp(1.2rem, 3vw, 1.8rem); font-weight: 400; color: rgba(255,255,255,0.9); animation: slideUp 0.8s ease forwards 0.2s; opacity: 0; }
-        .data-texto { font-size: clamp(1rem, 2.5vw, 1.2rem); color: rgba(255,255,255,0.8); margin-bottom: 1.5rem; animation: slideUp 0.8s ease forwards; }
-
-        /* --- Layout de Música --- */
+        .subtitulo-principal { font-size: clamp(1.2rem, 3vw, 1.8rem); font-weight: 400; color: rgba(255,255,255,0.9); }
+        .data-texto { font-size: clamp(1rem, 2.5vw, 1.2rem); color: rgba(255,255,255,0.8); margin-bottom: 1.5rem; }
         .layout-musica { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; max-width: 500px; cursor: default; }
         .player-container { width: 100%; margin: 1rem 0; background: #181818; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); padding: 1rem; }
         .video-wrapper { position: relative; padding-top: 56.25%; border-radius: 8px; overflow: hidden; }
         .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-        .texto-rodape-musica { font-size: clamp(0.9rem, 2vw, 1rem); color: rgba(255,255,255,0.8); font-style: italic; margin-top: 1rem; animation: slideUp 0.8s ease forwards 0.4s; opacity: 0; }
-
-        /* <-- MELHORIA 3 APLICADA AQUI --> */
-        /* --- Layout de Foto (Capítulos) --- */
-        .layout-foto { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; animation: fadeIn 0.8s ease; cursor: default; }
-        .card-foto { position: relative; width: 90%; max-width: 380px; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); overflow: hidden; animation: slideUp 0.8s ease forwards; }
+        .texto-rodape-musica { font-size: clamp(0.9rem, 2vw, 1rem); color: rgba(255,255,255,0.8); font-style: italic; margin-top: 1rem; opacity: 0; animation-delay: 0.4s; }
+        .layout-foto { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; cursor: default; }
+.card-foto { 
+  position: relative; 
+  width: 90%; 
+  max-width: 380px; 
+  border-radius: 20px; 
+  box-shadow: 0 15px 40px rgba(0,0,0,0.6); 
+  overflow: hidden; 
+  opacity: 0; 
+  animation: zoomIn 0.8s cubic-bezier(0.165, 0.84, 0.44, 1) forwards; 
+  transition: transform 0.4s ease, box-shadow 0.4s ease; 
+}        .card-foto:hover { transform: translateY(-10px) scale(1.03); box-shadow: 0 25px 50px rgba(0,0,0,0.7); }
         .imagem-capitulo { display: block; width: 100%; height: 450px; object-fit: cover; }
-        .texto-capitulo-container { 
-          background: rgba(28, 28, 28, 0.9); 
-          backdrop-filter: blur(10px); 
-          width: 90%; max-width: 380px; 
-          border-radius: 20px; 
-          padding: 1.5rem; 
-          margin-top: -60px; /* Ajustado para sobrepor um pouco, mas com mais espaço */
-          padding-top: 2rem; /* Espaço extra no topo para o texto não colar na imagem */
-          z-index: 20; 
-          position: relative; 
-          animation: slideUp 0.8s ease forwards 0.2s; 
-          opacity: 0; 
-          border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .numero-capitulo { font-size: 0.9rem; color: #e91e63; font-weight: 600; text-transform: uppercase; margin: 0 0 0.5rem 0; }
-        .titulo-capitulo { 
-          font-size: clamp(1.5rem, 4vw, 2rem); 
-          font-weight: 700; 
-          margin: 0 0 0.8rem 0; 
-          color: #FFFFFF; /* CORREÇÃO: Cor sólida para garantir legibilidade */
-          background: none; /* Removemos o background gradiente do texto */
-        }
-        .descricao-capitulo { font-size: clamp(1rem, 3vw, 1.1rem); color: rgba(255,255,255,0.9); line-height: 1.6; margin: 0; }
 
-        /* --- Contador --- */
+.texto-capitulo-container { 
+  background: rgba(28, 28, 28, 0.9); 
+  backdrop-filter: blur(10px); 
+  width: 90%; 
+  max-width: 380px; 
+  border-radius: 20px; 
+  padding: 1.5rem; 
+  margin-top: -60px; 
+  padding-top: 2rem; 
+  z-index: 20; 
+  position: relative; 
+  border: 1px solid rgba(255, 255, 255, 0.1); 
+  opacity: 0; 
+  animation: slideUpFromBottom 0.8s cubic-bezier(0.165, 0.84, 0.44, 1) forwards 0.3s; 
+}        .numero-capitulo { font-size: 0.9rem; color: #e91e63; font-weight: 600; text-transform: uppercase; margin: 0 0 0.5rem 0; }
+        .titulo-capitulo { font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 700; margin: 0 0 0.8rem 0; color: #FFFFFF; background: none; }
+        .descricao-capitulo { font-size: clamp(1rem, 3vw, 1.1rem); color: rgba(255,255,255,0.9); line-height: 1.6; margin: 0; }
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideUpFromBottom { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
         .contador-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin: 1.5rem 0; }
-        .contador-item { text-align: center; padding: 1rem; border-radius: 15px; min-width: 80px; animation: slideUp 0.8s ease forwards; }
+        .contador-item { text-align: center; padding: 1rem; border-radius: 15px; min-width: 80px; animation: slideUp 1s ease forwards; }
         .contador-item.especial { background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1)); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(15px); }
         .contador-valor { display: block; font-size: clamp(2rem, 5vw, 2.5rem); font-weight: 700; }
         .contador-label { display: block; font-size: 0.9rem; color: rgba(255,255,255,0.8); text-transform: uppercase; letter-spacing: 1px; }
-
-        /* --- Layout Final --- */
         .layout-final { display: flex; flex-direction: column; align-items: center; cursor: default; }
         .descricao-final { font-size: clamp(1rem, 3vw, 1.3rem); color: rgba(255,255,255,0.9); margin: -0.5rem 0 1.5rem 0; max-width: 500px; }
         .contador-final-label { font-size: 1.2rem; font-weight: 500; }
         .contador-item.final { background: rgba(0,0,0,0.2); padding: 0.8rem; min-width: 70px; border-radius: 12px; }
         .botao-compartilhar { font-size: 1.1rem; font-weight: 600; color: white; background: linear-gradient(135deg, #9c27b0, #e91e63); border: none; border-radius: 50px; padding: 1rem 2.5rem; margin-top: 2rem; cursor: pointer; box-shadow: 0 5px 20px rgba(233, 30, 99, 0.4); transition: transform 0.2s ease, box-shadow 0.2s ease; }
         .botao-compartilhar:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(233, 30, 99, 0.6); }
-
-        /* <-- MELHORIA 2 APLICADA AQUI --> */
-        /* --- Navegação Lateral --- */
-        .navegacao-dots-container {
-          position: fixed;
-          right: 20px;
-          top: 50%;
-          transform: translateY(-50%);
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          z-index: 1000;
-        }
-        .nav-dot {
-          width: 10px;
-          height: 10px;
-          background-color: rgba(255, 255, 255, 0.4);
-          border-radius: 50%;
-          cursor: pointer;
-          transition: all 0.3s ease;
-        }
-        .nav-dot:hover {
-          background-color: rgba(255, 255, 255, 0.8);
-          transform: scale(1.2);
-        }
-        .nav-dot.ativo {
-          background-color: #e91e63;
-          transform: scale(1.4);
-          box-shadow: 0 0 10px #e91e63;
-        }
-
+        .navegacao-dots-container { position: fixed; right: 20px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 12px; z-index: 1000; }
+        .nav-dot { width: 10px; height: 10px; background-color: rgba(255, 255, 255, 0.4); border-radius: 50%; cursor: pointer; transition: all 0.3s ease; }
+        .nav-dot:hover { background-color: rgba(255, 255, 255, 0.8); transform: scale(1.2); }
+        .nav-dot.ativo { background-color: #e91e63; transform: scale(1.4); box-shadow: 0 0 10px #e91e63; }
       `}</style>
     </main>
   );
