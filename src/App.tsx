@@ -560,7 +560,7 @@ function App() {
         }
         
         .subtitulo-principal { animation-delay: 0.2s; opacity: 0; }
-        .seta-container { position: absolute; bottom: 2rem; cursor: pointer; animation: bounce 2s infinite; color: rgba(255,255,255,0.7); transition: color 0.3s ease; z-index: 50; }
+        .seta-container { position: absolute; bottom: 7rem; cursor: pointer; animation: bounce 2s infinite; color: rgba(255,255,255,0.7); transition: color 0.3s ease; z-index: 50; }
         .seta-container:hover { color: #e91e63; }
         .estrelas-fundo, .planetas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; transition: transform 0.2s ease-out; }
         .estrelas-fundo { transform: translate(calc(var(--offsetX, 0) * -15px), calc(var(--offsetY, 0) * -15px)); }
